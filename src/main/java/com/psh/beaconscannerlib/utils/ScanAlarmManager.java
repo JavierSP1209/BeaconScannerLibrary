@@ -1,13 +1,13 @@
-package com.keysd.beaconscannerlib.utils;
+package com.psh.beaconscannerlib.utils;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 
-import com.keysd.beaconscannerlib.BLeScanService;
-import com.keysd.beaconscannerlib.ScanParameters;
-import com.keysd.beaconscannerlib.receiver.BLeStartScanBroadcastReceiver;
+import com.psh.beaconscannerlib.BLeScanService;
+import com.psh.beaconscannerlib.ScanParameters;
+import com.psh.beaconscannerlib.receiver.BLeStartScanBroadcastReceiver;
 
 public class ScanAlarmManager {
     public static void startScanAlarm(Context context, ScanParameters scanParameters) {

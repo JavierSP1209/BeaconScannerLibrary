@@ -1,4 +1,4 @@
-package com.keysd.beaconscannerlib;
+package com.psh.beaconscannerlib;
 
 import java.util.Arrays;
 

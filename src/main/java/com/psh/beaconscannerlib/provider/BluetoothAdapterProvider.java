@@ -1,4 +1,4 @@
-package com.keysd.beaconscannerlib.provider;
+package com.psh.beaconscannerlib.provider;
 
 import android.bluetooth.BluetoothAdapter;
 

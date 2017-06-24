@@ -1,4 +1,4 @@
-package com.keysd.beaconscannerlib;
+package com.psh.beaconscannerlib;
 
 import android.content.Context;
 import android.content.Intent;

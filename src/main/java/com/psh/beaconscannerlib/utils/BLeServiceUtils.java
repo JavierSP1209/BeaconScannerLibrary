@@ -1,4 +1,4 @@
-package com.keysd.beaconscannerlib.utils;
+package com.psh.beaconscannerlib.utils;
 
 public class BLeServiceUtils {
 

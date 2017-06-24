@@ -1,12 +1,12 @@
-package com.keysd.beaconscannerlib.utils;
+package com.psh.beaconscannerlib.utils;
 
 import android.app.AlarmManager;
 import android.content.Context;
 import android.content.Intent;
 
-import com.keysd.beaconscannerlib.BuildConfig;
-import com.keysd.beaconscannerlib.ScanParameters;
-import com.keysd.beaconscannerlib.receiver.BLeStartScanBroadcastReceiver;
+import com.psh.beaconscannerlib.BuildConfig;
+import com.psh.beaconscannerlib.ScanParameters;
+import com.psh.beaconscannerlib.receiver.BLeStartScanBroadcastReceiver;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -98,15 +98,15 @@ public class ScanAlarmManagerTest {
         ShadowAlarmManager.ScheduledAlarm repeatingAlarm = shadowAlarmManager.getNextScheduledAlarm();
         ShadowPendingIntent pendingIntent = shadowOf(repeatingAlarm.operation);
         Intent intent = pendingIntent.getSavedIntent();
-        assertThat(intent.hasExtra("com.keysd.beaconscannerlib.SCAN_PERIOD"), is(true));
-        assertThat(intent.hasExtra("com.keysd.beaconscannerlib.SCAN_INTERVAL"), is(true));
-        assertThat(intent.hasExtra("com.keysd.beaconscannerlib.FILTER_UUID"), is(true));
+        assertThat(intent.hasExtra("com.psh.beaconscannerlib.SCAN_PERIOD"), is(true));
+        assertThat(intent.hasExtra("com.psh.beaconscannerlib.SCAN_INTERVAL"), is(true));
+        assertThat(intent.hasExtra("com.psh.beaconscannerlib.FILTER_UUID"), is(true));
 
-        assertThat(intent.getLongExtra("com.keysd.beaconscannerlib.SCAN_PERIOD", 0L),
+        assertThat(intent.getLongExtra("com.psh.beaconscannerlib.SCAN_PERIOD", 0L),
                 is(expectedPeriod));
-        assertThat(intent.getLongExtra("com.keysd.beaconscannerlib.SCAN_INTERVAL", 0L),
+        assertThat(intent.getLongExtra("com.psh.beaconscannerlib.SCAN_INTERVAL", 0L),
                 is(expectedInterval));
-        assertThat(intent.getByteArrayExtra("com.keysd.beaconscannerlib.FILTER_UUID"),
+        assertThat(intent.getByteArrayExtra("com.psh.beaconscannerlib.FILTER_UUID"),
                 is(expectedFilterUUIDData));
     }
 

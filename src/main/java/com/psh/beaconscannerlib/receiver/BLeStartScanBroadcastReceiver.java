@@ -1,11 +1,11 @@
-package com.keysd.beaconscannerlib.receiver;
+package com.psh.beaconscannerlib.receiver;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import com.keysd.beaconscannerlib.BLeScanService;
-import com.keysd.beaconscannerlib.utils.Constants;
+import com.psh.beaconscannerlib.BLeScanService;
+import com.psh.beaconscannerlib.utils.Constants;
 
 
 public class BLeStartScanBroadcastReceiver extends BroadcastReceiver {

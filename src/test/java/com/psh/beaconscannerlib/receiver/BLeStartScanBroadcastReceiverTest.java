@@ -1,10 +1,10 @@
-package com.keysd.beaconscannerlib.receiver;
+package com.psh.beaconscannerlib.receiver;
 
 import android.content.Context;
 import android.content.Intent;
 
-import com.keysd.beaconscannerlib.BLeScanService;
-import com.keysd.beaconscannerlib.BuildConfig;
+import com.psh.beaconscannerlib.BLeScanService;
+import com.psh.beaconscannerlib.BuildConfig;
 
 import org.junit.Assert;
 import org.junit.Before;
