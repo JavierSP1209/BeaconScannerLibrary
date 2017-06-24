@@ -1,4 +1,4 @@
-package com.psh.beaconscannerlib;
+package com.prettysmarthomes.beaconscannerlib;
 
 import android.app.AlarmManager;
 import android.bluetooth.BluetoothAdapter;
@@ -9,7 +9,7 @@ import android.content.IntentFilter;
 import android.os.Handler;
 import android.support.v4.content.LocalBroadcastManager;
 
-import com.psh.beaconscannerlib.provider.BluetoothAdapterProvider;
+import com.prettysmarthomes.beaconscannerlib.provider.BluetoothAdapterProvider;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -71,10 +71,10 @@ public class BLeScanServiceTest {
     // create and injects mocks into object annotated with @InjectMocks
     MockitoAnnotations.initMocks(this);
     serviceIntent = new Intent(RuntimeEnvironment.application, BLeScanService.class);
-    serviceIntent.putExtra("com.psh.beaconscannerlib.FILTER_UUID", filterData);
+    serviceIntent.putExtra("com.prettysmarthomes.beaconscannerlib.FILTER_UUID", filterData);
     long scanInterval = 2000L;
-    serviceIntent.putExtra("com.psh.beaconscannerlib.SCAN_INTERVAL", scanInterval);
-    serviceIntent.putExtra("com.psh.beaconscannerlib.SCAN_PERIOD", scanPeriod);
+    serviceIntent.putExtra("com.prettysmarthomes.beaconscannerlib.SCAN_INTERVAL", scanInterval);
+    serviceIntent.putExtra("com.prettysmarthomes.beaconscannerlib.SCAN_PERIOD", scanPeriod);
 
     AlarmManager alarmManager = (AlarmManager) RuntimeEnvironment.application.getSystemService(
         Context.ALARM_SERVICE);
@@ -122,7 +122,7 @@ public class BLeScanServiceTest {
   public void onHandleIntent_filterUUIDNull_shouldSetNullFilter() {
     ArgumentCaptor<ScanSettings> settingsArgumentCaptor = ArgumentCaptor.forClass(
         ScanSettings.class);
-    serviceIntent.removeExtra("com.psh.beaconscannerlib.FILTER_UUID");
+    serviceIntent.removeExtra("com.prettysmarthomes.beaconscannerlib.FILTER_UUID");
     scanService.onHandleIntent(serviceIntent);
 
     verify(mockScannerCompat).startScan(scanFilterCaptor.capture(),
@@ -155,7 +155,7 @@ public class BLeScanServiceTest {
   @Test
   public void onHandleIntent_scanPeriodNotSet_shouldSetDefaultScanPeriodAsPostDelay() {
     scanService.setStopScanHandler(mockStopScanHandler);
-    serviceIntent.removeExtra("com.psh.beaconscannerlib.SCAN_PERIOD");
+    serviceIntent.removeExtra("com.prettysmarthomes.beaconscannerlib.SCAN_PERIOD");
     scanService.onHandleIntent(serviceIntent);
     verify(mockStopScanHandler).postDelayed(any(Runnable.class), eq(5000L));
   }
@@ -171,7 +171,7 @@ public class BLeScanServiceTest {
 
   @Test
   public void onHandleIntent_sendStartLocalBroadcast() {
-    registerLocalReceiver("com.psh.beaconscannerlib.SCAN_START");
+    registerLocalReceiver("com.prettysmarthomes.beaconscannerlib.SCAN_START");
     scanService.onHandleIntent(serviceIntent);
     assertThat(broadcastSent, is(true));
   }
@@ -185,7 +185,7 @@ public class BLeScanServiceTest {
 
   @Test
   public void stopScanHandler_sendLocalStopBroadcast() {
-    registerLocalReceiver("com.psh.beaconscannerlib.SCAN_STOP");
+    registerLocalReceiver("com.prettysmarthomes.beaconscannerlib.SCAN_STOP");
     scanService.onHandleIntent(serviceIntent);
     ShadowLooper.runUiThreadTasksIncludingDelayedTasks();
     assertThat(broadcastSent, is(true));

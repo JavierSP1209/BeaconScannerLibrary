@@ -1,4 +1,4 @@
-package com.psh.beaconscannerlib;
+package com.prettysmarthomes.beaconscannerlib;
 
 import android.app.IntentService;
 import android.bluetooth.BluetoothAdapter;
@@ -6,9 +6,9 @@ import android.content.Intent;
 import android.os.Handler;
 import android.support.v4.content.LocalBroadcastManager;
 
-import com.psh.beaconscannerlib.provider.BluetoothAdapterProvider;
-import com.psh.beaconscannerlib.utils.Constants;
-import com.psh.beaconscannerlib.utils.ScanAlarmManager;
+import com.prettysmarthomes.beaconscannerlib.provider.BluetoothAdapterProvider;
+import com.prettysmarthomes.beaconscannerlib.utils.Constants;
+import com.prettysmarthomes.beaconscannerlib.utils.ScanAlarmManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +17,7 @@ import no.nordicsemi.android.support.v18.scanner.BluetoothLeScannerCompat;
 import no.nordicsemi.android.support.v18.scanner.ScanFilter;
 import no.nordicsemi.android.support.v18.scanner.ScanSettings;
 
-import static com.psh.beaconscannerlib.utils.Constants.TAG;
+import static com.prettysmarthomes.beaconscannerlib.utils.Constants.TAG;
 
 /**
  * BLe cycled scanner, this service will be restarted when the scan is finished unless BLe is not
@@ -26,14 +26,14 @@ import static com.psh.beaconscannerlib.utils.Constants.TAG;
 public class BLeScanService extends IntentService {
 
   private static final byte[] MASK = new byte[]{0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0};
-  public static final String ACTION_BEACON_FOUND = "com.psh.beaconscannerlib.BEACON_FOUND";
-  public static final String ACTION_SCAN_START = "com.psh.beaconscannerlib.SCAN_START";
-  public static final String ACTION_SCAN_STOP = "com.psh.beaconscannerlib.SCAN_STOP";
+  public static final String ACTION_BEACON_FOUND = "com.prettysmarthomes.beaconscannerlib.BEACON_FOUND";
+  public static final String ACTION_SCAN_START = "com.prettysmarthomes.beaconscannerlib.SCAN_START";
+  public static final String ACTION_SCAN_STOP = "com.prettysmarthomes.beaconscannerlib.SCAN_STOP";
 
-  public static final String EXTRA_BEACON_CONTENT = "com.psh.beaconscannerlib.BEACON_CONTENT";
-  public static final String EXTRA_SCAN_PERIOD = "com.psh.beaconscannerlib.SCAN_PERIOD";
-  public static final String EXTRA_SCAN_INTERVAL = "com.psh.beaconscannerlib.SCAN_INTERVAL";
-  public static final String EXTRA_FILTER_UUID = "com.psh.beaconscannerlib.FILTER_UUID";
+  public static final String EXTRA_BEACON_CONTENT = "com.prettysmarthomes.beaconscannerlib.BEACON_CONTENT";
+  public static final String EXTRA_SCAN_PERIOD = "com.prettysmarthomes.beaconscannerlib.SCAN_PERIOD";
+  public static final String EXTRA_SCAN_INTERVAL = "com.prettysmarthomes.beaconscannerlib.SCAN_INTERVAL";
+  public static final String EXTRA_FILTER_UUID = "com.prettysmarthomes.beaconscannerlib.FILTER_UUID";
 
   private BluetoothAdapterProvider bluetoothAdapterProvider;
   private Handler stopScanHandler;

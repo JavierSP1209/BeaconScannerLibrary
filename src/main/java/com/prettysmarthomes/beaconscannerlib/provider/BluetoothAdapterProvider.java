@@ -1,4 +1,4 @@
-package com.psh.beaconscannerlib.provider;
+package com.prettysmarthomes.beaconscannerlib.provider;
 
 import android.bluetooth.BluetoothAdapter;
 

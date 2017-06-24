@@ -1,4 +1,4 @@
-package com.psh.beaconscannerlib.utils;
+package com.prettysmarthomes.beaconscannerlib.utils;
 
 public class Constants {
 

@@ -1,4 +1,4 @@
-package com.psh.beaconscannerlib;
+package com.prettysmarthomes.beaconscannerlib;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

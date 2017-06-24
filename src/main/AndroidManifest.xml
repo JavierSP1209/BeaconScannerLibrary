@@ -1,5 +1,5 @@
-<manifest package="com.psh.beaconscannerlib"
-  xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+  package="com.prettysmarthomes.beaconscannerlib">
 
   <uses-permission android:name="android.permission.BLUETOOTH" />
   <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />

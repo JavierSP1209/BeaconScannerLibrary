@@ -1,12 +1,12 @@
-package com.psh.beaconscannerlib.utils;
+package com.prettysmarthomes.beaconscannerlib.utils;
 
 import android.app.AlarmManager;
 import android.content.Context;
 import android.content.Intent;
 
-import com.psh.beaconscannerlib.BuildConfig;
-import com.psh.beaconscannerlib.ScanParameters;
-import com.psh.beaconscannerlib.receiver.BLeStartScanBroadcastReceiver;
+import com.prettysmarthomes.beaconscannerlib.BuildConfig;
+import com.prettysmarthomes.beaconscannerlib.ScanParameters;
+import com.prettysmarthomes.beaconscannerlib.receiver.BLeStartScanBroadcastReceiver;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -98,15 +98,15 @@ public class ScanAlarmManagerTest {
     ShadowAlarmManager.ScheduledAlarm repeatingAlarm = shadowAlarmManager.getNextScheduledAlarm();
     ShadowPendingIntent pendingIntent = shadowOf(repeatingAlarm.operation);
     Intent intent = pendingIntent.getSavedIntent();
-    assertThat(intent.hasExtra("com.psh.beaconscannerlib.SCAN_PERIOD"), is(true));
-    assertThat(intent.hasExtra("com.psh.beaconscannerlib.SCAN_INTERVAL"), is(true));
-    assertThat(intent.hasExtra("com.psh.beaconscannerlib.FILTER_UUID"), is(true));
+    assertThat(intent.hasExtra("com.prettysmarthomes.beaconscannerlib.SCAN_PERIOD"), is(true));
+    assertThat(intent.hasExtra("com.prettysmarthomes.beaconscannerlib.SCAN_INTERVAL"), is(true));
+    assertThat(intent.hasExtra("com.prettysmarthomes.beaconscannerlib.FILTER_UUID"), is(true));
 
-    assertThat(intent.getLongExtra("com.psh.beaconscannerlib.SCAN_PERIOD", 0L),
+    assertThat(intent.getLongExtra("com.prettysmarthomes.beaconscannerlib.SCAN_PERIOD", 0L),
         is(expectedPeriod));
-    assertThat(intent.getLongExtra("com.psh.beaconscannerlib.SCAN_INTERVAL", 0L),
+    assertThat(intent.getLongExtra("com.prettysmarthomes.beaconscannerlib.SCAN_INTERVAL", 0L),
         is(expectedInterval));
-    assertThat(intent.getByteArrayExtra("com.psh.beaconscannerlib.FILTER_UUID"),
+    assertThat(intent.getByteArrayExtra("com.prettysmarthomes.beaconscannerlib.FILTER_UUID"),
         is(expectedFilterUUIDData));
   }
 

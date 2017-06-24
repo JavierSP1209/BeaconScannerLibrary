@@ -1,11 +1,11 @@
-package com.psh.beaconscannerlib.receiver;
+package com.prettysmarthomes.beaconscannerlib.receiver;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import com.psh.beaconscannerlib.BLeScanService;
-import com.psh.beaconscannerlib.utils.Constants;
+import com.prettysmarthomes.beaconscannerlib.BLeScanService;
+import com.prettysmarthomes.beaconscannerlib.utils.Constants;
 
 
 public class BLeStartScanBroadcastReceiver extends BroadcastReceiver {
