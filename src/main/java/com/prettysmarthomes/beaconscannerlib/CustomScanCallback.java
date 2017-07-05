@@ -5,6 +5,8 @@ import android.content.Intent;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import no.nordicsemi.android.support.v18.scanner.ScanCallback;
 import no.nordicsemi.android.support.v18.scanner.ScanRecord;
 import no.nordicsemi.android.support.v18.scanner.ScanResult;
@@ -13,6 +15,7 @@ class CustomScanCallback extends ScanCallback {
 
   private Context context;
 
+  @Inject
   CustomScanCallback(Context context) {
     this.context = context;
   }

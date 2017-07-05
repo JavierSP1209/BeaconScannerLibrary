@@ -7,6 +7,16 @@ import java.util.Arrays;
  * desired parameters Created by javier.silva on 5/22/16.
  */
 public class ScanParameters {
+  /**
+   * Default scan interval for the scan service in milliseconds, a period is the time between
+   * scans
+   */
+  static final long DEFAULT_BLE_SCAN_INTERVAL_MS = 10000;
+  /**
+   * Default scan period, the actual scanning time for each scan
+   */
+  static final long DEFAULT_BLE_SCAN_PERIOD_MS = 5000;
+  static final long SCAN_RESULTS_DELAY = 1000;
   private long scanPeriod;
   private long scanInterval;
   private byte[] filterUUIDData;

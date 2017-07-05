@@ -6,18 +6,12 @@ import android.content.Intent;
 import android.os.Handler;
 import android.support.v4.content.LocalBroadcastManager;
 
-import com.prettysmarthomes.beaconscannerlib.provider.BluetoothAdapterProvider;
-import com.prettysmarthomes.beaconscannerlib.utils.Constants;
-import com.prettysmarthomes.beaconscannerlib.utils.ScanAlarmManager;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import no.nordicsemi.android.support.v18.scanner.BluetoothLeScannerCompat;
 import no.nordicsemi.android.support.v18.scanner.ScanFilter;
 import no.nordicsemi.android.support.v18.scanner.ScanSettings;
-
-import static com.prettysmarthomes.beaconscannerlib.utils.Constants.TAG;
 
 /**
  * BLe cycled scanner, this service will be restarted when the scan is finished unless BLe is not
@@ -34,13 +28,15 @@ public class BLeScanService extends IntentService {
   public static final String EXTRA_SCAN_PERIOD = "com.prettysmarthomes.beaconscannerlib.SCAN_PERIOD";
   public static final String EXTRA_SCAN_INTERVAL = "com.prettysmarthomes.beaconscannerlib.SCAN_INTERVAL";
   public static final String EXTRA_FILTER_UUID = "com.prettysmarthomes.beaconscannerlib.FILTER_UUID";
+  public static final String TAG = "BleScanService";
 
-  private BluetoothAdapterProvider bluetoothAdapterProvider;
   private Handler stopScanHandler;
   private BluetoothLeScannerCompat scanner;
-  private CustomScanCallback scanCallback;
   private byte[] filterData;
   private long scanInterval;
+
+  BluetoothAdapter adapter;
+  private CustomScanCallback scanCallback;
 
   private Runnable serviceStarter = new Runnable() {
     @Override
@@ -55,10 +51,6 @@ public class BLeScanService extends IntentService {
     this.stopScanHandler = stopScanHandler;
   }
 
-  void setBluetoothAdapterProvider(BluetoothAdapterProvider bluetoothAdapterProvider) {
-    this.bluetoothAdapterProvider = bluetoothAdapterProvider;
-  }
-
   void setScanner(BluetoothLeScannerCompat scanner) {
     this.scanner = scanner;
   }
@@ -71,7 +63,6 @@ public class BLeScanService extends IntentService {
   public void onCreate() {
     super.onCreate();
     stopScanHandler = new Handler();
-    bluetoothAdapterProvider = new BluetoothAdapterProvider();
     scanner = BluetoothLeScannerCompat.getScanner();
     scanCallback = new CustomScanCallback(this);
   }
@@ -80,9 +71,9 @@ public class BLeScanService extends IntentService {
   protected void onHandleIntent(Intent intent) {
     filterData = intent.getByteArrayExtra(EXTRA_FILTER_UUID);
     scanPeriod = intent.getLongExtra(EXTRA_SCAN_PERIOD,
-        Constants.DEFAULT_BLE_SCAN_PERIOD_MS);
+        ScanParameters.DEFAULT_BLE_SCAN_PERIOD_MS);
     scanInterval = intent.getLongExtra(EXTRA_SCAN_INTERVAL,
-        Constants.DEFAULT_BLE_SCAN_INTERVAL_MS);
+        ScanParameters.DEFAULT_BLE_SCAN_INTERVAL_MS);
     if (isBLeEnabled()) {
       startScan();
       restartService();
@@ -93,7 +84,7 @@ public class BLeScanService extends IntentService {
   private void startScan() {
     ScanSettings settings = new ScanSettings.Builder()
         .setScanMode(ScanSettings.SCAN_MODE_BALANCED).setReportDelay(
-            Constants.SCAN_RESULTS_DELAY)
+            ScanParameters.SCAN_RESULTS_DELAY)
         .setUseHardwareBatchingIfSupported(false).build();
     List<ScanFilter> filters = new ArrayList<>();
     ScanFilter.Builder builder = new ScanFilter.Builder();

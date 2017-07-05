@@ -9,7 +9,7 @@ import android.content.IntentFilter;
 import android.os.Handler;
 import android.support.v4.content.LocalBroadcastManager;
 
-import com.prettysmarthomes.beaconscannerlib.provider.BluetoothAdapterProvider;
+import com.prettysmarthomes.beaconscannerlib.view.CustomScanCallback;
 
 import org.junit.Before;
 import org.junit.Test;

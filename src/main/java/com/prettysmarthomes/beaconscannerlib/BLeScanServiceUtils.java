@@ -1,8 +1,8 @@
-package com.prettysmarthomes.beaconscannerlib.utils;
+package com.prettysmarthomes.beaconscannerlib;
 
-public class BLeServiceUtils {
+public class BLeScanServiceUtils {
 
-  final protected static char[] hexArray = "0123456789ABCDEF".toCharArray();
+  final private static char[] hexArray = "0123456789ABCDEF".toCharArray();
 
   public static String bytesToHex(byte[] bytes) {
     char[] hexChars = new char[bytes.length * 2];

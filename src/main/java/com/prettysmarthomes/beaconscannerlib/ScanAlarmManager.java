@@ -1,13 +1,9 @@
-package com.prettysmarthomes.beaconscannerlib.utils;
+package com.prettysmarthomes.beaconscannerlib;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-
-import com.prettysmarthomes.beaconscannerlib.BLeScanService;
-import com.prettysmarthomes.beaconscannerlib.ScanParameters;
-import com.prettysmarthomes.beaconscannerlib.receiver.BLeStartScanBroadcastReceiver;
 
 public class ScanAlarmManager {
   public static void startScanAlarm(Context context, ScanParameters scanParameters) {

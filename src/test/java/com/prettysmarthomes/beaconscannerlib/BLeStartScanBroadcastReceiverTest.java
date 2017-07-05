@@ -1,10 +1,7 @@
-package com.prettysmarthomes.beaconscannerlib.receiver;
+package com.prettysmarthomes.beaconscannerlib;
 
 import android.content.Context;
 import android.content.Intent;
-
-import com.prettysmarthomes.beaconscannerlib.BLeScanService;
-import com.prettysmarthomes.beaconscannerlib.BuildConfig;
 
 import org.junit.Assert;
 import org.junit.Before;
