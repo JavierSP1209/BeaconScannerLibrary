@@ -9,8 +9,6 @@ import android.content.IntentFilter;
 import android.os.Handler;
 import android.support.v4.content.LocalBroadcastManager;
 
-import com.prettysmarthomes.beaconscannerlib.view.CustomScanCallback;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -50,8 +48,6 @@ public class BLeScanServiceTest {
   Handler mockStopScanHandler;
 
   @Mock
-  BluetoothAdapterProvider mockBluetoothAdapterProvider;
-  @Mock
   BluetoothAdapter mockBluetoothAdapter;
   @Mock
   BluetoothLeScannerCompat mockScannerCompat;
@@ -80,13 +76,13 @@ public class BLeScanServiceTest {
         Context.ALARM_SERVICE);
     shadowAlarmManager = shadowOf(alarmManager);
 
-    when(mockBluetoothAdapterProvider.getInstance()).thenReturn(mockBluetoothAdapter);
+    //when(mockBluetoothAdapterProvider.getInstance()).thenReturn(mockBluetoothAdapter);
     when(mockBluetoothAdapter.isEnabled()).thenReturn(true);
     broadcastSent = false;
 
     scanService = new BLeScanServiceMock();
     scanService.onCreate();
-    scanService.setBluetoothAdapterProvider(mockBluetoothAdapterProvider);
+    //scanService.setBluetoothAdapterProvider(mockBluetoothAdapterProvider);
     scanService.setScanner(mockScannerCompat);
   }
 

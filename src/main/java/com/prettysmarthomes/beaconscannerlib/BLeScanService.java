@@ -6,8 +6,13 @@ import android.content.Intent;
 import android.os.Handler;
 import android.support.v4.content.LocalBroadcastManager;
 
+import com.prettysmarthomes.beaconscannerlib.di.BleScanServiceModule;
+import com.prettysmarthomes.beaconscannerlib.di.DaggerBLeScanServiceComponent;
+
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.inject.Inject;
 
 import no.nordicsemi.android.support.v18.scanner.BluetoothLeScannerCompat;
 import no.nordicsemi.android.support.v18.scanner.ScanFilter;
@@ -35,8 +40,10 @@ public class BLeScanService extends IntentService {
   private byte[] filterData;
   private long scanInterval;
 
+  @Inject
   BluetoothAdapter adapter;
-  private CustomScanCallback scanCallback;
+  @Inject
+  CustomScanCallback scanCallback;
 
   private Runnable serviceStarter = new Runnable() {
     @Override
@@ -62,6 +69,10 @@ public class BLeScanService extends IntentService {
   @Override
   public void onCreate() {
     super.onCreate();
+    DaggerBLeScanServiceComponent.builder()
+        .bleScanServiceModule(new BleScanServiceModule(this))
+        .build()
+        .inject(this);
     stopScanHandler = new Handler();
     scanner = BluetoothLeScannerCompat.getScanner();
     scanCallback = new CustomScanCallback(this);
@@ -106,7 +117,6 @@ public class BLeScanService extends IntentService {
   }
 
   private boolean isBLeEnabled() {
-    BluetoothAdapter adapter = bluetoothAdapterProvider.getInstance();
     return adapter != null && adapter.isEnabled();
   }
 
