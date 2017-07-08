@@ -105,7 +105,7 @@ public class BLeScanServiceTest {
 
     ScanSettings actualSettings = settingsArgumentCaptor.getValue();
     assertThat(actualSettings.getScanMode(), is(equalTo(ScanSettings.SCAN_MODE_BALANCED)));
-    assertThat(actualSettings.getReportDelayMillis(), is(equalTo(3000L)));
+    assertThat(actualSettings.getReportDelayMillis(), is(equalTo(1000L)));
     assertThat(actualSettings.getUseHardwareBatchingIfSupported(), is(false));
 
     byte[] mask = new byte[]{0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0};
@@ -122,10 +122,11 @@ public class BLeScanServiceTest {
   }
 
   @Test
-  public void onHandleIntent_filterUUIDNull_shouldSetNullFilter() {
+  public void onHandleIntent_filterUUIDNull_shouldSetEmptyFilter() {
     ArgumentCaptor<ScanSettings> settingsArgumentCaptor = ArgumentCaptor.forClass(
         ScanSettings.class);
     serviceIntent.removeExtra("com.prettysmarthomes.beaconscannerlib.FILTER_UUID");
+    ScanFilter expectedFilter = new ScanFilter.Builder().build();
     scanService.onHandleIntent(serviceIntent);
 
     verify(mockScannerCompat).startScan(scanFilterCaptor.capture(),
@@ -135,9 +136,7 @@ public class BLeScanServiceTest {
     // Add data array to filters
     List<ScanFilter> actualFilters = scanFilterCaptor.getValue();
     assertThat(actualFilters.size(), is(1));
-    assertThat(actualFilters.get(0), nullValue());
-
-
+    assertThat(actualFilters.get(0), is(expectedFilter));
   }
 
   @Test

@@ -84,7 +84,9 @@ public class BLeScanService extends IntentService {
         ScanParameters.DEFAULT_BLE_SCAN_PERIOD_MS);
     scanInterval = intent.getLongExtra(EXTRA_SCAN_INTERVAL,
         ScanParameters.DEFAULT_BLE_SCAN_INTERVAL_MS);
-    Log.d(TAG, "filter: " + BLeScanServiceUtils.bytesToHex(filterData) + " - " + scanPeriod + " - " + scanInterval);
+    if(filterData!=null) {
+      Log.d(TAG, "filter: " + BLeScanServiceUtils.bytesToHex(filterData) + " - " + scanPeriod + " - " + scanInterval);
+    }
     if (isBLeEnabled()) {
       startScan();
       restartService();
