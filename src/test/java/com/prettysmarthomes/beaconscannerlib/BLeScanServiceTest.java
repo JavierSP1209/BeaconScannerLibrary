@@ -9,6 +9,11 @@ import android.content.IntentFilter;
 import android.os.Handler;
 import android.support.v4.content.LocalBroadcastManager;
 
+import com.prettysmarthomes.beaconscannerlib.di.BLeScanServiceTestComponent;
+import com.prettysmarthomes.beaconscannerlib.di.BleScanServiceBaseModule;
+import com.prettysmarthomes.beaconscannerlib.di.DaggerBLeScanServiceTestComponent;
+
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,8 +21,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
+import org.robolectric.android.controller.IntentServiceController;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowAlarmManager;
 import org.robolectric.shadows.ShadowLog;
@@ -46,20 +53,17 @@ public class BLeScanServiceTest {
 
   @Mock
   Handler mockStopScanHandler;
-
-  @Mock
-  BluetoothAdapter mockBluetoothAdapter;
-  @Mock
   BluetoothLeScannerCompat mockScannerCompat;
+  BluetoothAdapter mockBluetoothAdapter;
   @Captor
   private ArgumentCaptor<List<ScanFilter>> scanFilterCaptor;
-  private BLeScanService scanService;
-
+  private BLeScanServiceMock scanService;
   private Intent serviceIntent;
   private byte[] filterData = {0, 0, -71, 64, 127, 48, -11, -8, 70, 110, -81, -7, 37, 85, 107, 87, -2, 109, 0, 0, 0, 0, 0};
   private long scanPeriod = 1000L;
   private ShadowAlarmManager shadowAlarmManager;
   private boolean broadcastSent;
+  private IntentServiceController<BLeScanServiceMock> controller;
 
   @Before
   public void setUp() throws Exception {
@@ -76,14 +80,17 @@ public class BLeScanServiceTest {
         Context.ALARM_SERVICE);
     shadowAlarmManager = shadowOf(alarmManager);
 
-    //when(mockBluetoothAdapterProvider.getInstance()).thenReturn(mockBluetoothAdapter);
-    when(mockBluetoothAdapter.isEnabled()).thenReturn(true);
     broadcastSent = false;
+    controller = Robolectric.buildIntentService(BLeScanServiceMock.class);
+    scanService = controller.create().get();
+    mockBluetoothAdapter = scanService.testComponent.getBluetoothAdapter();
+    mockScannerCompat = scanService.testComponent.getBluetoothLeScannerCompat();
+    when(mockBluetoothAdapter.isEnabled()).thenReturn(true);
+  }
 
-    scanService = new BLeScanServiceMock();
-    scanService.onCreate();
-    //scanService.setBluetoothAdapterProvider(mockBluetoothAdapterProvider);
-    scanService.setScanner(mockScannerCompat);
+  @After
+  public void tearDown() {
+    controller.destroy();
   }
 
   @Test
@@ -198,10 +205,24 @@ public class BLeScanServiceTest {
     }, new IntentFilter(action));
   }
 
-  class BLeScanServiceMock extends BLeScanService {
+  static class BLeScanServiceMock extends BLeScanService {
+    private BLeScanServiceTestComponent testComponent;
+
+    public BLeScanServiceMock(String name) {
+      super(name);
+    }
+
     @Override
-    public void onHandleIntent(Intent intent) {
+    protected void onHandleIntent(Intent intent) {
       super.onHandleIntent(intent);
+    }
+
+    @Override
+    protected void injectMembers() {
+      testComponent = DaggerBLeScanServiceTestComponent.builder()
+          .bleScanServiceBaseModule(new BleScanServiceBaseModule(this))
+          .build();
+      testComponent.inject(this);
     }
   }
 }

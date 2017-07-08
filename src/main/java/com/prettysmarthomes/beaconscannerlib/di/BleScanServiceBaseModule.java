@@ -9,7 +9,7 @@ import dagger.Module;
 import dagger.Provides;
 
 /**
- * Base module for BaseScanService includes the providers that will not be overrided for testing
+ * Base module for BaseScanService includes the providers that will not be replaced for testing
  */
 @Module(includes = BleScanServiceBaseModule.Bindings.class)
 public class BleScanServiceBaseModule {

@@ -4,9 +4,11 @@ import android.app.IntentService;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.os.Handler;
+import android.support.annotation.VisibleForTesting;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 
-import com.prettysmarthomes.beaconscannerlib.di.BleScanServiceModule;
+import com.prettysmarthomes.beaconscannerlib.di.BleScanServiceBaseModule;
 import com.prettysmarthomes.beaconscannerlib.di.DaggerBLeScanServiceComponent;
 
 import java.util.ArrayList;
@@ -35,15 +37,16 @@ public class BLeScanService extends IntentService {
   public static final String EXTRA_FILTER_UUID = "com.prettysmarthomes.beaconscannerlib.FILTER_UUID";
   public static final String TAG = "BleScanService";
 
-  private Handler stopScanHandler;
-  private BluetoothLeScannerCompat scanner;
   private byte[] filterData;
   private long scanInterval;
 
+  private Handler stopScanHandler;
   @Inject
   BluetoothAdapter adapter;
   @Inject
   CustomScanCallback scanCallback;
+  @Inject
+  BluetoothLeScannerCompat scanner;
 
   private Runnable serviceStarter = new Runnable() {
     @Override
@@ -54,37 +57,34 @@ public class BLeScanService extends IntentService {
   };
   private long scanPeriod;
 
-  void setStopScanHandler(Handler stopScanHandler) {
-    this.stopScanHandler = stopScanHandler;
-  }
-
-  void setScanner(BluetoothLeScannerCompat scanner) {
-    this.scanner = scanner;
-  }
-
-  public BLeScanService() {
-    super(TAG);
+  public BLeScanService(String name) {
+    super(name);
   }
 
   @Override
   public void onCreate() {
     super.onCreate();
+    injectMembers();
+    stopScanHandler = new Handler();
+  }
+
+  @VisibleForTesting
+  protected void injectMembers() {
     DaggerBLeScanServiceComponent.builder()
-        .bleScanServiceModule(new BleScanServiceModule(this))
+        .bleScanServiceBaseModule(new BleScanServiceBaseModule(this))
         .build()
         .inject(this);
-    stopScanHandler = new Handler();
-    scanner = BluetoothLeScannerCompat.getScanner();
-    scanCallback = new CustomScanCallback(this);
   }
 
   @Override
   protected void onHandleIntent(Intent intent) {
+    Log.d(TAG, "onHandleIntent()");
     filterData = intent.getByteArrayExtra(EXTRA_FILTER_UUID);
     scanPeriod = intent.getLongExtra(EXTRA_SCAN_PERIOD,
         ScanParameters.DEFAULT_BLE_SCAN_PERIOD_MS);
     scanInterval = intent.getLongExtra(EXTRA_SCAN_INTERVAL,
         ScanParameters.DEFAULT_BLE_SCAN_INTERVAL_MS);
+    Log.d(TAG, "filter: " + BLeScanServiceUtils.bytesToHex(filterData) + " - " + scanPeriod + " - " + scanInterval);
     if (isBLeEnabled()) {
       startScan();
       restartService();
@@ -93,6 +93,7 @@ public class BLeScanService extends IntentService {
   }
 
   private void startScan() {
+    Log.d(TAG, "startScan() called");
     ScanSettings settings = new ScanSettings.Builder()
         .setScanMode(ScanSettings.SCAN_MODE_BALANCED).setReportDelay(
             ScanParameters.SCAN_RESULTS_DELAY)
@@ -123,5 +124,9 @@ public class BLeScanService extends IntentService {
   private void sendStateLocalBroadcast(String action) {
     LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(
         new Intent(action));
+  }
+
+  public void setStopScanHandler(Handler stopScanHandler) {
+    this.stopScanHandler = stopScanHandler;
   }
 }
