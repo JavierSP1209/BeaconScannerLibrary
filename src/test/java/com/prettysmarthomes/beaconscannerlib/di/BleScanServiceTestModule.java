@@ -5,14 +5,18 @@ import android.bluetooth.BluetoothAdapter;
 import dagger.Module;
 import dagger.Provides;
 
+import static org.mockito.Mockito.mock;
+
 /**
  * Base module for BLeScanService
  */
-@Module(includes = BleScanServiceBaseModule.class)
-public final class BleScanServiceModule {
+@Module(includes = {
+    BleScanServiceBaseModule.class,
+    BleScanServiceBaseModule.Bindings.class})
+public final class BleScanServiceTestModule {
 
   @Provides
   static BluetoothAdapter providesBluetoothAdapter() {
-    return BluetoothAdapter.getDefaultAdapter();
+    return mock(BluetoothAdapter.class);
   }
 }

@@ -11,6 +11,11 @@ android {
     versionName "1.0"
 
     testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+    android.libraryVariants.all {
+      def aptOutputDir = new File(buildDir, "generated/source/apt/${it.unitTestVariant.dirName}")
+      it.unitTestVariant.addJavaSourceFoldersToModel(aptOutputDir)
+    }
   }
 
   flavorDimensions "red"
@@ -29,6 +34,11 @@ android {
   useLibrary 'org.apache.http.legacy'
 }
 
+//android.applicationVariants.all {
+//  def aptOutputDir = new File(buildDir, "generated/source/apt/${it.unitTestVariant.dirName}")
+//  it.unitTestVariant.addJavaSourceFoldersToModel(aptOutputDir)
+//}
+
 dependencies {
   implementation fileTree(dir: 'libs', include: ['*.jar'])
   implementation 'no.nordicsemi.android.support.v18:scanner:0.1.2'
@@ -39,6 +49,8 @@ dependencies {
   testImplementation 'org.mockito:mockito-core:2.7.22'
   testImplementation 'org.robolectric:robolectric:3.3.2'
   testImplementation 'org.robolectric:shadows-httpclient:3.0'
+  testAnnotationProcessor 'com.google.dagger:dagger-compiler:2.11'
+  testAnnotationProcessor 'com.google.dagger:dagger-android-processor:2.11'
 
   //Dagger
   implementation 'com.google.dagger:dagger:2.11'
