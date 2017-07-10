@@ -6,8 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-class ScanAlarmManager {
-  static void startScanAlarm(Context context, ScanParameters scanParameters) {
+public class ScanAlarmManager {
+  public static void startScanAlarm(Context context, ScanParameters scanParameters) {
     AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
     Intent queryIntent = new Intent(context, BLeStartScanBroadcastReceiver.class);
     queryIntent.putExtra(BLeScanService.EXTRA_SCAN_PERIOD, scanParameters.getScanPeriod());
@@ -22,7 +22,7 @@ class ScanAlarmManager {
         System.currentTimeMillis() + scanParameters.getScanInterval(), pendingQueryIntent);
   }
 
-  static void cancelScanAlarm(Context context) {
+  public static void cancelScanAlarm(Context context) {
     AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
     Intent queryIntent = new Intent(context, BLeStartScanBroadcastReceiver.class);
     PendingIntent pendingQueryIntent = PendingIntent.getBroadcast(context, 0, queryIntent,

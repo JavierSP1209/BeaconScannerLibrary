@@ -57,8 +57,8 @@ public class BLeScanService extends IntentService {
   };
   private long scanPeriod;
 
-  public BLeScanService(String name) {
-    super(name);
+  public BLeScanService() {
+    super(TAG);
   }
 
   @Override

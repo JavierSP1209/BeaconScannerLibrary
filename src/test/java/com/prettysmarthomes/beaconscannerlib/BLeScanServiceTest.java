@@ -208,7 +208,7 @@ public class BLeScanServiceTest {
     private BLeScanServiceTestComponent testComponent;
 
     public BLeScanServiceMock(String name) {
-      super(name);
+      super();
     }
 
     @Override

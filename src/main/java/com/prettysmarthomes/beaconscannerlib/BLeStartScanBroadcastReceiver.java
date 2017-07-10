@@ -6,7 +6,7 @@ import android.content.Intent;
 import android.util.Log;
 
 
-class BLeStartScanBroadcastReceiver extends BroadcastReceiver {
+public class BLeStartScanBroadcastReceiver extends BroadcastReceiver {
   @Override
   public void onReceive(Context context, Intent intent) {
     Log.d(BLeScanService.TAG, "onReceive() intent = [" + intent + "]");
