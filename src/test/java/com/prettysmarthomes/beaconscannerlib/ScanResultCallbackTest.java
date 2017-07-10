@@ -4,14 +4,13 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
 
-import com.prettysmarthomes.beaconscannerlib.CustomScanCallback;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import java.util.LinkedList;
@@ -31,16 +30,13 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class)
-public class CustomScanCallbackTest {
-
-  @Mock
-  Context context;
-  CustomScanCallback subject;
+public class ScanResultCallbackTest {
+  ScanResultCallback subject;
 
   @Before
   public void setUp() throws Exception {
     initMocks(this);
-    subject = new CustomScanCallback(context);
+    subject = new ScanResultCallback(RuntimeEnvironment.application);
   }
 
   @Test
@@ -53,7 +49,7 @@ public class CustomScanCallbackTest {
 
     ArgumentCaptor<Intent> intentArgumentCaptor = ArgumentCaptor.forClass(Intent.class);
     subject.onBatchScanResults(resultList);
-    verify(context).sendBroadcast(intentArgumentCaptor.capture());
+    verify(RuntimeEnvironment.application).sendBroadcast(intentArgumentCaptor.capture());
 
     Intent actualIntent = intentArgumentCaptor.getValue();
     assertThat(actualIntent.getAction(), is(equalTo(BLeScanService.ACTION_BEACON_FOUND)));

@@ -8,6 +8,7 @@ import android.support.annotation.VisibleForTesting;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.prettysmarthomes.beaconscannerlib.ScanParameters.ManufacturerID;
 import com.prettysmarthomes.beaconscannerlib.di.BleScanServiceBaseModule;
 import com.prettysmarthomes.beaconscannerlib.di.DaggerBLeScanServiceComponent;
 
@@ -44,7 +45,7 @@ public class BLeScanService extends IntentService {
   @Inject
   BluetoothAdapter adapter;
   @Inject
-  CustomScanCallback scanCallback;
+  ScanResultCallback scanCallback;
   @Inject
   BluetoothLeScannerCompat scanner;
 
@@ -94,7 +95,6 @@ public class BLeScanService extends IntentService {
   }
 
   private void startScan() {
-    Log.d(TAG, "startScan() called");
     ScanSettings settings = new ScanSettings.Builder()
         .setScanMode(ScanSettings.SCAN_MODE_BALANCED).setReportDelay(
             ScanParameters.SCAN_RESULTS_DELAY)
@@ -105,7 +105,7 @@ public class BLeScanService extends IntentService {
     if (filterData != null) {
       mask = MASK;
     }
-    builder.setManufacturerData(0x4C, filterData, mask);
+    builder.setManufacturerData(ManufacturerID.I_BEACON, filterData, mask);
     filters.add(builder.build());
     scanner.startScan(filters, settings, scanCallback);
     sendStateLocalBroadcast(ACTION_SCAN_START);

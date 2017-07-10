@@ -9,6 +9,7 @@ import android.content.IntentFilter;
 import android.os.Handler;
 import android.support.v4.content.LocalBroadcastManager;
 
+import com.prettysmarthomes.beaconscannerlib.ScanParameters.ManufacturerID;
 import com.prettysmarthomes.beaconscannerlib.di.BLeScanServiceTestComponent;
 import com.prettysmarthomes.beaconscannerlib.di.BleScanServiceBaseModule;
 import com.prettysmarthomes.beaconscannerlib.di.DaggerBLeScanServiceTestComponent;
@@ -101,7 +102,7 @@ public class BLeScanServiceTest {
 
     verify(mockScannerCompat).startScan(scanFilterCaptor.capture(),
         settingsArgumentCaptor.capture(),
-        any(CustomScanCallback.class));
+        any(ScanResultCallback.class));
 
     ScanSettings actualSettings = settingsArgumentCaptor.getValue();
     assertThat(actualSettings.getScanMode(), is(equalTo(ScanSettings.SCAN_MODE_BALANCED)));
@@ -128,13 +129,13 @@ public class BLeScanServiceTest {
     serviceIntent.removeExtra("com.prettysmarthomes.beaconscannerlib.FILTER_UUID");
     ScanFilter expectedFilter = new ScanFilter
         .Builder()
-        .setManufacturerData(0x4C, null, null)
+        .setManufacturerData(ManufacturerID.I_BEACON, null, null)
         .build();
     scanService.onHandleIntent(serviceIntent);
 
     verify(mockScannerCompat).startScan(scanFilterCaptor.capture(),
         settingsArgumentCaptor.capture(),
-        any(CustomScanCallback.class));
+        any(ScanResultCallback.class));
 
     // Add data array to filters
     List<ScanFilter> actualFilters = scanFilterCaptor.getValue();
@@ -185,7 +186,7 @@ public class BLeScanServiceTest {
   public void stopScanHandler_stopScansAfterPeriodFinish() {
     scanService.onHandleIntent(serviceIntent);
     ShadowLooper.runUiThreadTasksIncludingDelayedTasks();
-    verify(mockScannerCompat).stopScan(any(CustomScanCallback.class));
+    verify(mockScannerCompat).stopScan(any(ScanResultCallback.class));
   }
 
   @Test
