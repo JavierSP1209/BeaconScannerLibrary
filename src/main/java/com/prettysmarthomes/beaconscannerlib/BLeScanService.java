@@ -78,13 +78,12 @@ public class BLeScanService extends IntentService {
 
   @Override
   protected void onHandleIntent(Intent intent) {
-    Log.d(TAG, "onHandleIntent()");
     filterData = intent.getByteArrayExtra(EXTRA_FILTER_UUID);
     scanPeriod = intent.getLongExtra(EXTRA_SCAN_PERIOD,
         ScanParameters.DEFAULT_BLE_SCAN_PERIOD_MS);
     scanInterval = intent.getLongExtra(EXTRA_SCAN_INTERVAL,
         ScanParameters.DEFAULT_BLE_SCAN_INTERVAL_MS);
-    if(filterData!=null) {
+    if (filterData != null) {
       Log.d(TAG, "filter: " + BLeScanServiceUtils.bytesToHex(filterData) + " - " + scanPeriod + " - " + scanInterval);
     }
     if (isBLeEnabled()) {
@@ -102,9 +101,11 @@ public class BLeScanService extends IntentService {
         .setUseHardwareBatchingIfSupported(false).build();
     List<ScanFilter> filters = new ArrayList<>();
     ScanFilter.Builder builder = new ScanFilter.Builder();
+    byte[] mask = null;
     if (filterData != null) {
-      builder.setManufacturerData(89, filterData, MASK);
+      mask = MASK;
     }
+    builder.setManufacturerData(0x4C, filterData, mask);
     filters.add(builder.build());
     scanner.startScan(filters, settings, scanCallback);
     sendStateLocalBroadcast(ACTION_SCAN_START);

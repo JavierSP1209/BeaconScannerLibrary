@@ -126,7 +126,10 @@ public class BLeScanServiceTest {
     ArgumentCaptor<ScanSettings> settingsArgumentCaptor = ArgumentCaptor.forClass(
         ScanSettings.class);
     serviceIntent.removeExtra("com.prettysmarthomes.beaconscannerlib.FILTER_UUID");
-    ScanFilter expectedFilter = new ScanFilter.Builder().build();
+    ScanFilter expectedFilter = new ScanFilter
+        .Builder()
+        .setManufacturerData(0x4C, null, null)
+        .build();
     scanService.onHandleIntent(serviceIntent);
 
     verify(mockScannerCompat).startScan(scanFilterCaptor.capture(),
