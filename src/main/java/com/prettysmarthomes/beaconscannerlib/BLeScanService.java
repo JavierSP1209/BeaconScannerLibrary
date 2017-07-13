@@ -4,15 +4,16 @@ import android.app.IntentService;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
-import com.prettysmarthomes.beaconscannerlib.ScanParameters.ManufacturerID;
 import com.prettysmarthomes.beaconscannerlib.di.BleScanServiceBaseModule;
 import com.prettysmarthomes.beaconscannerlib.di.DaggerBLeScanServiceComponent;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -33,13 +34,8 @@ public class BLeScanService extends IntentService {
   public static final String ACTION_SCAN_STOP = "com.prettysmarthomes.beaconscannerlib.SCAN_STOP";
 
   public static final String EXTRA_BEACON_CONTENT = "com.prettysmarthomes.beaconscannerlib.BEACON_CONTENT";
-  public static final String EXTRA_SCAN_PERIOD = "com.prettysmarthomes.beaconscannerlib.SCAN_PERIOD";
-  public static final String EXTRA_SCAN_INTERVAL = "com.prettysmarthomes.beaconscannerlib.SCAN_INTERVAL";
-  public static final String EXTRA_FILTER_UUID = "com.prettysmarthomes.beaconscannerlib.FILTER_UUID";
+  public static final String EXTRA_SCAN_PARAMS = "com.prettysmarthomes.beaconscannerlib.SCAN_PARAMS";
   public static final String TAG = "BleScanService";
-
-  private byte[] filterData;
-  private long scanInterval;
 
   private Handler stopScanHandler;
   @Inject
@@ -48,6 +44,8 @@ public class BLeScanService extends IntentService {
   ScanResultCallback scanCallback;
   @Inject
   BluetoothLeScannerCompat scanner;
+  @Inject
+  ScanAlarmManager scanAlarmManager;
 
   private Runnable serviceStarter = new Runnable() {
     @Override
@@ -56,7 +54,6 @@ public class BLeScanService extends IntentService {
       sendStateLocalBroadcast(ACTION_SCAN_STOP);
     }
   };
-  private long scanPeriod;
 
   public BLeScanService() {
     super(TAG);
@@ -79,45 +76,49 @@ public class BLeScanService extends IntentService {
 
   @Override
   protected void onHandleIntent(Intent intent) {
-    filterData = intent.getByteArrayExtra(EXTRA_FILTER_UUID);
-    scanPeriod = intent.getLongExtra(EXTRA_SCAN_PERIOD,
-        ScanParameters.DEFAULT_BLE_SCAN_PERIOD_MS);
-    scanInterval = intent.getLongExtra(EXTRA_SCAN_INTERVAL,
-        ScanParameters.DEFAULT_BLE_SCAN_INTERVAL_MS);
-    if (filterData != null) {
-      Log.d(TAG, "filter: " + BLeScanServiceUtils.bytesToHex(filterData) + " - " + scanPeriod + " - " + scanInterval);
-    }
-    if (isBLeEnabled()) {
-      startScan();
-      restartService();
-      stopScanHandler.postDelayed(serviceStarter, scanPeriod);
+    ScanParameters scanParams = intent.getParcelableExtra(EXTRA_SCAN_PARAMS);
+    if (scanParams != null) {
+      if (isBLeEnabled()) {
+        startScan(scanParams);
+        scanAlarmManager.startScanAlarm(getApplicationContext(), scanParams);
+        stopScanHandler.postDelayed(serviceStarter, scanParams.getScanPeriod());
+      }
+    } else {
+      throw new IllegalStateException("Extra 'com.prettysmarthomes.beaconscannerlib.SCAN_PARAMS' not set");
     }
   }
 
-  private void startScan() {
+  private void startScan(@NonNull ScanParameters scanParams) {
     ScanSettings settings = new ScanSettings.Builder()
         .setScanMode(ScanSettings.SCAN_MODE_BALANCED).setReportDelay(
             ScanParameters.SCAN_RESULTS_DELAY)
         .setUseHardwareBatchingIfSupported(false).build();
     List<ScanFilter> filters = new ArrayList<>();
     ScanFilter.Builder builder = new ScanFilter.Builder();
-    byte[] mask = null;
-    if (filterData != null) {
-      mask = MASK;
+    int manufacturerId = scanParams.getManufacturerId();
+    //Negative manufacturer id is consider invalid by the filter, so if its not valid do not set it
+    if (manufacturerId > 0) {
+      byte[] mask = MASK;
+      byte[] filterUUIDData = scanParams.getFilterUUIDData();
+      //If filter data is null, do not include mask
+      if (filterUUIDData == null) {
+        mask = null;
+        Log.e(TAG, "null FilterData, mask ignored: ");
+      } else {
+        if (filterUUIDData.length != mask.length) {
+          Log.e(TAG, "invalid FilterData, for mask: " + Arrays.toString(mask));
+          filterUUIDData = null;
+          mask = null;
+        }
+      }
+
+      builder.setManufacturerData(manufacturerId, filterUUIDData, mask);
+    } else {
+      Log.e(TAG, "Invalid(negative) manufacturerID set: " + manufacturerId);
     }
-    builder.setManufacturerData(ManufacturerID.I_BEACON, filterData, mask);
     filters.add(builder.build());
     scanner.startScan(filters, settings, scanCallback);
     sendStateLocalBroadcast(ACTION_SCAN_START);
-  }
-
-  private void restartService() {
-    ScanParameters scanParameters = new ScanParameters.Builder()
-        .setScanInterval(scanInterval)
-        .setScanPeriod(scanPeriod)
-        .setFilterUUIDData(filterData)
-        .build();
-    ScanAlarmManager.startScanAlarm(getApplicationContext(), scanParameters);
   }
 
   private boolean isBLeEnabled() {

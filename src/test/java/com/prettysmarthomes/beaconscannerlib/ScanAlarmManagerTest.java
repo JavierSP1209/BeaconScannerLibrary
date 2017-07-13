@@ -8,6 +8,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
@@ -17,37 +19,39 @@ import org.robolectric.shadows.ShadowPendingIntent;
 import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.when;
 import static org.robolectric.Shadows.shadowOf;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class)
 public class ScanAlarmManagerTest {
 
-  private ShadowAlarmManager shadowAlarmManager;
-  private Context context;
   private static final long INTERVAL = 20000L;
-  private ScanParameters scanParameters = new ScanParameters.Builder().setScanInterval(
-      INTERVAL).build();
+  @Mock
+  private ScanParameters scanParameters;
+  private ShadowAlarmManager shadowAlarmManager;
+  private ScanAlarmManager subject;
 
   @Before
   public void setUp() {
-    AlarmManager alarmManager = (AlarmManager) RuntimeEnvironment.application.getSystemService(
-        Context.ALARM_SERVICE);
+    MockitoAnnotations.initMocks(this);
+    subject = new ScanAlarmManager();
+    when(scanParameters.getScanInterval()).thenReturn(INTERVAL);
+    AlarmManager alarmManager = (AlarmManager) RuntimeEnvironment.application.getSystemService(Context.ALARM_SERVICE);
     shadowAlarmManager = shadowOf(alarmManager);
-    context = RuntimeEnvironment.application.getApplicationContext();
   }
 
   @Test
   public void startScanAlarm_shouldScheduleAlarm() {
     Assert.assertNull("Previous alarm exists", shadowAlarmManager.getNextScheduledAlarm());
-    ScanAlarmManager.startScanAlarm(context, scanParameters);
+    subject.startScanAlarm(RuntimeEnvironment.application, scanParameters);
     ShadowAlarmManager.ScheduledAlarm repeatingAlarm = shadowAlarmManager.getNextScheduledAlarm();
     Assert.assertNotNull("Alarm not scheduled", repeatingAlarm);
   }
 
   @Test
   public void startScanAlarm_shouldScheduleAlarmEachInterval() {
-    ScanAlarmManager.startScanAlarm(context, scanParameters);
+    subject.startScanAlarm(RuntimeEnvironment.application, scanParameters);
     long startTime = System.currentTimeMillis();
     ShadowAlarmManager.ScheduledAlarm repeatingAlarm = shadowAlarmManager.getNextScheduledAlarm();
     assertThat(AlarmManager.RTC, is(repeatingAlarm.type));
@@ -58,9 +62,9 @@ public class ScanAlarmManagerTest {
 
   @Test
   public void startScanAlarm_shouldScheduleOnlyOneTime() throws Exception {
-    ScanAlarmManager.startScanAlarm(context, scanParameters);
-    ScanAlarmManager.startScanAlarm(context, scanParameters);
-    ScanAlarmManager.startScanAlarm(context, scanParameters);
+    subject.startScanAlarm(RuntimeEnvironment.application, scanParameters);
+    subject.startScanAlarm(RuntimeEnvironment.application, scanParameters);
+    subject.startScanAlarm(RuntimeEnvironment.application, scanParameters);
 
     assertThat(1, is(shadowAlarmManager.getScheduledAlarms().size()));
   }
@@ -68,9 +72,9 @@ public class ScanAlarmManagerTest {
   @Test
   public void startScanAlarm_shouldTriggerBroadcastReceiverWhenTimeElapsed()
       throws Exception {
-    Intent expectedIntent = new Intent(context, BLeStartScanBroadcastReceiver.class);
+    Intent expectedIntent = new Intent(RuntimeEnvironment.application, BLeStartScanBroadcastReceiver.class);
 
-    ScanAlarmManager.startScanAlarm(context, scanParameters);
+    subject.startScanAlarm(RuntimeEnvironment.application, scanParameters);
 
     ShadowAlarmManager.ScheduledAlarm scheduledAlarm = shadowAlarmManager.getNextScheduledAlarm();
     ShadowPendingIntent shadowPendingIntent = shadowOf(scheduledAlarm.operation);
@@ -82,34 +86,20 @@ public class ScanAlarmManagerTest {
 
   @Test
   public void startScanAlarm_setScanParameterExtras() {
-    long expectedPeriod = 5L;
-    long expectedInterval = 5L;
-    byte[] expectedFilterUUIDData = new byte[]{0, 1, 1, 0};
-    ScanParameters scanParameters = new ScanParameters.Builder()
-        .setScanInterval(expectedInterval)
-        .setScanPeriod(expectedPeriod)
-        .setFilterUUIDData(expectedFilterUUIDData)
-        .build();
-    ScanAlarmManager.startScanAlarm(context, scanParameters);
+    subject.startScanAlarm(RuntimeEnvironment.application, scanParameters);
     ShadowAlarmManager.ScheduledAlarm repeatingAlarm = shadowAlarmManager.getNextScheduledAlarm();
     ShadowPendingIntent pendingIntent = shadowOf(repeatingAlarm.operation);
     Intent intent = pendingIntent.getSavedIntent();
-    assertThat(intent.hasExtra("com.prettysmarthomes.beaconscannerlib.SCAN_PERIOD"), is(true));
-    assertThat(intent.hasExtra("com.prettysmarthomes.beaconscannerlib.SCAN_INTERVAL"), is(true));
-    assertThat(intent.hasExtra("com.prettysmarthomes.beaconscannerlib.FILTER_UUID"), is(true));
+    assertThat(intent.hasExtra("com.prettysmarthomes.beaconscannerlib.SCAN_PARAMS"), is(true));
 
-    assertThat(intent.getLongExtra("com.prettysmarthomes.beaconscannerlib.SCAN_PERIOD", 0L),
-        is(expectedPeriod));
-    assertThat(intent.getLongExtra("com.prettysmarthomes.beaconscannerlib.SCAN_INTERVAL", 0L),
-        is(expectedInterval));
-    assertThat(intent.getByteArrayExtra("com.prettysmarthomes.beaconscannerlib.FILTER_UUID"),
-        is(expectedFilterUUIDData));
+    assertThat((ScanParameters) intent.getParcelableExtra("com.prettysmarthomes.beaconscannerlib.SCAN_PARAMS"),
+        is(scanParameters));
   }
 
   @Test
   public void cancelSHealthSyncAlarm_shouldRemoveAlarm() {
-    ScanAlarmManager.startScanAlarm(context, scanParameters);
-    ScanAlarmManager.cancelScanAlarm(context);
+    subject.startScanAlarm(RuntimeEnvironment.application, scanParameters);
+    subject.cancelScanAlarm(RuntimeEnvironment.application);
     ShadowAlarmManager.ScheduledAlarm repeatingAlarm = shadowAlarmManager.getNextScheduledAlarm();
     Assert.assertNull("Alarm scheduled", repeatingAlarm);
   }

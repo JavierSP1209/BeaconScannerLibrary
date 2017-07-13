@@ -2,6 +2,8 @@ package com.prettysmarthomes.beaconscannerlib.di;
 
 import android.bluetooth.BluetoothAdapter;
 
+import com.prettysmarthomes.beaconscannerlib.ScanAlarmManager;
+
 import javax.inject.Singleton;
 
 import dagger.Module;
@@ -26,5 +28,11 @@ public final class BleScanServiceTestModule {
   @Singleton
   static BluetoothLeScannerCompat providesBluetoothLeScannerCompat() {
     return mock(BluetoothLeScannerCompat.class);
+  }
+
+  @Provides
+  @Singleton
+  static ScanAlarmManager providesScanAlarmManager() {
+    return mock(ScanAlarmManager.class);
   }
 }

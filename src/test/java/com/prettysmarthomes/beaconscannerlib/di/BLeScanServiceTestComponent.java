@@ -2,6 +2,8 @@ package com.prettysmarthomes.beaconscannerlib.di;
 
 import android.bluetooth.BluetoothAdapter;
 
+import com.prettysmarthomes.beaconscannerlib.ScanAlarmManager;
+
 import javax.inject.Singleton;
 
 import dagger.Component;
@@ -17,4 +19,6 @@ public interface BLeScanServiceTestComponent extends BLeScanServiceComponent {
   BluetoothAdapter getBluetoothAdapter();
 
   BluetoothLeScannerCompat getBluetoothLeScannerCompat();
+
+  ScanAlarmManager getScanAlarmManager();
 }

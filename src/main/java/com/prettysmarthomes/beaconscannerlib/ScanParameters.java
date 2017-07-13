@@ -1,12 +1,15 @@
 package com.prettysmarthomes.beaconscannerlib;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.util.Arrays;
 
 /**
  * Class containing the scan parameters to use, this class uses the builder pattern to set only the
  * desired parameters Created by javier.silva on 5/22/16.
  */
-public class ScanParameters {
+public class ScanParameters implements Parcelable {
   /**
    * Default scan interval for the scan service in milliseconds, a period is the time between
    * scans
@@ -35,6 +38,38 @@ public class ScanParameters {
     this.manufacturerId = manufacturerId;
   }
 
+  private ScanParameters(Parcel in) {
+    scanPeriod = in.readLong();
+    scanInterval = in.readLong();
+    manufacturerId = in.readInt();
+    filterUUIDData = in.createByteArray();
+  }
+
+  @Override
+  public void writeToParcel(Parcel dest, int flags) {
+    dest.writeLong(scanPeriod);
+    dest.writeLong(scanInterval);
+    dest.writeInt(manufacturerId);
+    dest.writeByteArray(filterUUIDData);
+  }
+
+  @Override
+  public int describeContents() {
+    return 0;
+  }
+
+  public static final Creator<ScanParameters> CREATOR = new Creator<ScanParameters>() {
+    @Override
+    public ScanParameters createFromParcel(Parcel in) {
+      return new ScanParameters(in);
+    }
+
+    @Override
+    public ScanParameters[] newArray(int size) {
+      return new ScanParameters[size];
+    }
+  };
+
   public long getScanPeriod() {
     return scanPeriod;
   }
@@ -62,9 +97,9 @@ public class ScanParameters {
   }
 
   public static class Builder {
-    private long nestedScanPeriod;
-    private long nestedScanInterval;
-    private int nestedManufacturerId;
+    private long nestedScanPeriod = DEFAULT_BLE_SCAN_PERIOD_MS;
+    private long nestedScanInterval = DEFAULT_BLE_SCAN_INTERVAL_MS;
+    private int nestedManufacturerId = -1;
     private byte[] nestedFilterUUIDData;
 
     public Builder setScanPeriod(long scanPeriod) {

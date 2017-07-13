@@ -9,7 +9,6 @@ import android.content.IntentFilter;
 import android.os.Handler;
 import android.support.v4.content.LocalBroadcastManager;
 
-import com.prettysmarthomes.beaconscannerlib.ScanParameters.ManufacturerID;
 import com.prettysmarthomes.beaconscannerlib.di.BLeScanServiceTestComponent;
 import com.prettysmarthomes.beaconscannerlib.di.BleScanServiceBaseModule;
 import com.prettysmarthomes.beaconscannerlib.di.DaggerBLeScanServiceTestComponent;
@@ -39,7 +38,6 @@ import no.nordicsemi.android.support.v18.scanner.ScanSettings;
 
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
-import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
@@ -52,16 +50,22 @@ import static org.robolectric.Shadows.shadowOf;
 @Config(constants = BuildConfig.class)
 public class BLeScanServiceTest {
 
+  private static final long SCAN_PERIOD = 13435L;
+  private static final long SCAN_INTERVAL = 1000L;
+  private static final byte[] FILTER_DATA = {0, 0, -71, 64, 127, 48, -11, -8, 70, 110, -81, -7, 37, 85, 107, 87, -2, 109, 0, 0, 0, 0, 0};
+  private static final int MY_MANUFACTURER_ID = 0x20;
+
   @Mock
-  Handler mockStopScanHandler;
-  BluetoothLeScannerCompat mockScannerCompat;
-  BluetoothAdapter mockBluetoothAdapter;
+  private Handler mockStopScanHandler;
+  @Mock
+  private ScanParameters scanParameters;
+  private BluetoothLeScannerCompat mockScannerCompat;
+  private BluetoothAdapter mockBluetoothAdapter;
+  private ScanAlarmManager mockScanAlarmManager;
   @Captor
   private ArgumentCaptor<List<ScanFilter>> scanFilterCaptor;
   private BLeScanServiceMock scanService;
   private Intent serviceIntent;
-  private byte[] filterData = {0, 0, -71, 64, 127, 48, -11, -8, 70, 110, -81, -7, 37, 85, 107, 87, -2, 109, 0, 0, 0, 0, 0};
-  private long scanPeriod = 1000L;
   private ShadowAlarmManager shadowAlarmManager;
   private boolean broadcastSent;
   private IntentServiceController<BLeScanServiceMock> controller;
@@ -72,10 +76,11 @@ public class BLeScanServiceTest {
     // create and injects mocks into object annotated with @InjectMocks
     MockitoAnnotations.initMocks(this);
     serviceIntent = new Intent(RuntimeEnvironment.application, BLeScanService.class);
-    serviceIntent.putExtra("com.prettysmarthomes.beaconscannerlib.FILTER_UUID", filterData);
-    long scanInterval = 2000L;
-    serviceIntent.putExtra("com.prettysmarthomes.beaconscannerlib.SCAN_INTERVAL", scanInterval);
-    serviceIntent.putExtra("com.prettysmarthomes.beaconscannerlib.SCAN_PERIOD", scanPeriod);
+    when(scanParameters.getScanPeriod()).thenReturn(SCAN_PERIOD);
+    when(scanParameters.getScanInterval()).thenReturn(SCAN_INTERVAL);
+    when(scanParameters.getFilterUUIDData()).thenReturn(FILTER_DATA);
+    when(scanParameters.getManufacturerId()).thenReturn(MY_MANUFACTURER_ID);
+    serviceIntent.putExtra("com.prettysmarthomes.beaconscannerlib.SCAN_PARAMS", scanParameters);
 
     AlarmManager alarmManager = (AlarmManager) RuntimeEnvironment.application.getSystemService(
         Context.ALARM_SERVICE);
@@ -86,6 +91,7 @@ public class BLeScanServiceTest {
     scanService = controller.create().get();
     mockBluetoothAdapter = scanService.testComponent.getBluetoothAdapter();
     mockScannerCompat = scanService.testComponent.getBluetoothLeScannerCompat();
+    mockScanAlarmManager = scanService.testComponent.getScanAlarmManager();
     when(mockBluetoothAdapter.isEnabled()).thenReturn(true);
   }
 
@@ -103,6 +109,7 @@ public class BLeScanServiceTest {
     verify(mockScannerCompat).startScan(scanFilterCaptor.capture(),
         settingsArgumentCaptor.capture(),
         any(ScanResultCallback.class));
+    verify(mockScanAlarmManager).startScanAlarm(RuntimeEnvironment.application, scanParameters);
 
     ScanSettings actualSettings = settingsArgumentCaptor.getValue();
     assertThat(actualSettings.getScanMode(), is(equalTo(ScanSettings.SCAN_MODE_BALANCED)));
@@ -111,59 +118,68 @@ public class BLeScanServiceTest {
 
     byte[] mask = new byte[]{0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0};
 
-
     // Add data array to filters
-    ScanFilter filter = new ScanFilter.Builder().setManufacturerData(76, filterData,
-        mask).build();
     List<ScanFilter> actualFilters = scanFilterCaptor.getValue();
     assertThat(actualFilters.size(), is(1));
     ScanFilter actualFilter = actualFilters.get(0);
-    assertThat(actualFilter.getManufacturerDataMask(), is(filter.getManufacturerDataMask()));
-    assertThat(actualFilter.getManufacturerData(), is(filter.getManufacturerData()));
+    assertThat(actualFilter.getManufacturerDataMask(), is(mask));
+    assertThat(actualFilter.getManufacturerData(), is(FILTER_DATA));
+    assertThat(actualFilter.getManufacturerId(), is(MY_MANUFACTURER_ID));
+  }
+
+  @Test(expected = IllegalStateException.class)
+  public void onHandleIntent_whenNullScanParams_shouldThrowIllegalStateException() {
+    scanService.onHandleIntent(new Intent());
   }
 
   @Test
-  public void onHandleIntent_filterUUIDNull_shouldSetEmptyFilter() {
-    ArgumentCaptor<ScanSettings> settingsArgumentCaptor = ArgumentCaptor.forClass(
-        ScanSettings.class);
-    serviceIntent.removeExtra("com.prettysmarthomes.beaconscannerlib.FILTER_UUID");
-    ScanFilter expectedFilter = new ScanFilter
-        .Builder()
-        .setManufacturerData(ManufacturerID.I_BEACON, null, null)
-        .build();
+  public void onHandleIntent_invalidManufacturerId_doNotSetManufacturerData() {
+    //Invalid ManufacturerId means that the value is negative
+    when(scanParameters.getManufacturerId()).thenReturn(-2);
     scanService.onHandleIntent(serviceIntent);
-
     verify(mockScannerCompat).startScan(scanFilterCaptor.capture(),
-        settingsArgumentCaptor.capture(),
+        any(ScanSettings.class),
+        any(ScanResultCallback.class));
+    ScanFilter actualFilter = scanFilterCaptor.getValue().get(0);
+    assertThat(actualFilter.getManufacturerId(), is(-1));
+  }
+
+
+  @Test
+  public void onHandleIntent_nullFilterData_shouldSetNullManufacturerDataInFilter() {
+    //Invalid FilterData means null when mask is not null or length of mask and data is different
+    when(scanParameters.getFilterUUIDData()).thenReturn(null);
+    scanService.onHandleIntent(serviceIntent);
+    verify(mockScannerCompat).startScan(scanFilterCaptor.capture(),
+        any(ScanSettings.class),
         any(ScanResultCallback.class));
 
-    // Add data array to filters
-    List<ScanFilter> actualFilters = scanFilterCaptor.getValue();
-    assertThat(actualFilters.size(), is(1));
-    assertThat(actualFilters.get(0), is(expectedFilter));
+    ScanFilter actualFilter = scanFilterCaptor.getValue().get(0);
+    assertThat(actualFilter.getManufacturerId(), is(MY_MANUFACTURER_ID));
+    assertThat(actualFilter.getManufacturerData(), is(nullValue()));
+    assertThat(actualFilter.getManufacturerDataMask(), is(nullValue()));
   }
 
   @Test
-  public void onHandleIntent_shouldSetStartScanAlarm() {
+  public void onHandleIntent_invalidFilterData_shouldSetNullManufacturerDataInFilter() {
+    //Invalid FilterData means null when mask is not null or length of mask and data is different
+    when(scanParameters.getFilterUUIDData()).thenReturn(new byte[]{0, 0, 1, 2, 3, 4, 0});
     scanService.onHandleIntent(serviceIntent);
+    verify(mockScannerCompat).startScan(scanFilterCaptor.capture(),
+        any(ScanSettings.class),
+        any(ScanResultCallback.class));
 
-    ShadowAlarmManager.ScheduledAlarm alarm = shadowAlarmManager.getNextScheduledAlarm();
-    assertThat(alarm, notNullValue());
+    ScanFilter actualFilter = scanFilterCaptor.getValue().get(0);
+    assertThat(actualFilter.getManufacturerId(), is(MY_MANUFACTURER_ID));
+    assertThat(actualFilter.getManufacturerData(), is(nullValue()));
+    assertThat(actualFilter.getManufacturerDataMask(), is(nullValue()));
   }
 
   @Test
   public void onHandleIntent_shouldSetScanPeriodAsPostDelay() {
     scanService.setStopScanHandler(mockStopScanHandler);
     scanService.onHandleIntent(serviceIntent);
-    verify(mockStopScanHandler).postDelayed(any(Runnable.class), eq(scanPeriod));
-  }
-
-  @Test
-  public void onHandleIntent_scanPeriodNotSet_shouldSetDefaultScanPeriodAsPostDelay() {
-    scanService.setStopScanHandler(mockStopScanHandler);
-    serviceIntent.removeExtra("com.prettysmarthomes.beaconscannerlib.SCAN_PERIOD");
-    scanService.onHandleIntent(serviceIntent);
-    verify(mockStopScanHandler).postDelayed(any(Runnable.class), eq(5000L));
+    verify(mockStopScanHandler).postDelayed(any(Runnable.class), eq(SCAN_PERIOD));
   }
 
   @Test

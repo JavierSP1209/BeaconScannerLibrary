@@ -10,7 +10,6 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import java.util.LinkedList;
@@ -31,12 +30,14 @@ import static org.mockito.MockitoAnnotations.initMocks;
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class)
 public class ScanResultCallbackTest {
-  ScanResultCallback subject;
+  private ScanResultCallback subject;
+  @Mock
+  private Context context;
 
   @Before
   public void setUp() throws Exception {
     initMocks(this);
-    subject = new ScanResultCallback(RuntimeEnvironment.application);
+    subject = new ScanResultCallback(context);
   }
 
   @Test
@@ -49,7 +50,7 @@ public class ScanResultCallbackTest {
 
     ArgumentCaptor<Intent> intentArgumentCaptor = ArgumentCaptor.forClass(Intent.class);
     subject.onBatchScanResults(resultList);
-    verify(RuntimeEnvironment.application).sendBroadcast(intentArgumentCaptor.capture());
+    verify(context).sendBroadcast(intentArgumentCaptor.capture());
 
     Intent actualIntent = intentArgumentCaptor.getValue();
     assertThat(actualIntent.getAction(), is(equalTo(BLeScanService.ACTION_BEACON_FOUND)));

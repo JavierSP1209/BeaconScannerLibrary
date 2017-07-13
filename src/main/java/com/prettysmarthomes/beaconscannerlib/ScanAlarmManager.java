@@ -4,14 +4,13 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.support.annotation.NonNull;
 
 public class ScanAlarmManager {
-  public static void startScanAlarm(Context context, ScanParameters scanParameters) {
+  public void startScanAlarm(@NonNull Context context, @NonNull ScanParameters scanParameters) {
     AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
     Intent queryIntent = new Intent(context, BLeStartScanBroadcastReceiver.class);
-    queryIntent.putExtra(BLeScanService.EXTRA_SCAN_PERIOD, scanParameters.getScanPeriod());
-    queryIntent.putExtra(BLeScanService.EXTRA_SCAN_INTERVAL, scanParameters.getScanInterval());
-    queryIntent.putExtra(BLeScanService.EXTRA_FILTER_UUID, scanParameters.getFilterUUIDData());
+    queryIntent.putExtra(BLeScanService.EXTRA_SCAN_PARAMS, scanParameters);
     PendingIntent pendingQueryIntent = PendingIntent.getBroadcast(context, 0, queryIntent,
         PendingIntent.FLAG_UPDATE_CURRENT);
 
@@ -20,7 +19,7 @@ public class ScanAlarmManager {
         System.currentTimeMillis() + scanParameters.getScanInterval(), pendingQueryIntent);
   }
 
-  public static void cancelScanAlarm(Context context) {
+  public void cancelScanAlarm(@NonNull Context context) {
     AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
     Intent queryIntent = new Intent(context, BLeStartScanBroadcastReceiver.class);
     PendingIntent pendingQueryIntent = PendingIntent.getBroadcast(context, 0, queryIntent,

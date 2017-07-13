@@ -1,40 +1,48 @@
 package com.prettysmarthomes.beaconscannerlib;
 
-import android.content.Context;
 import android.content.Intent;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowApplication;
+
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class)
 public class BLeStartScanBroadcastReceiverTest {
 
-  BLeStartScanBroadcastReceiver subject;
-  Context applicationContext;
-  ShadowApplication shadowApplication;
+  private BLeStartScanBroadcastReceiver subject;
+  private ShadowApplication shadowApplication;
 
   @Before
   public void setUp() throws Exception {
     subject = new BLeStartScanBroadcastReceiver();
     shadowApplication = ShadowApplication.getInstance();
-    applicationContext = shadowApplication.getApplicationContext();
   }
 
   @Test
   public void onReceive_shouldStartService() throws Exception {
 
-    subject.onReceive(applicationContext, null);
+    Intent testIntent = new Intent();
+    testIntent.putExtra("MYPARAM", 20);
+    ScanParameters expectedScanParams = mock(ScanParameters.class);
+    testIntent.putExtra("OtherParam", expectedScanParams);
+    subject.onReceive(RuntimeEnvironment.application, testIntent);
 
     Intent serviceIntent = shadowApplication.peekNextStartedService();
-    Assert.assertNotNull("Service not restarted", serviceIntent);
-    Assert.assertEquals("Expected the BLeScanService service to be invoked",
+    assertThat("Service not started", serviceIntent, is(notNullValue()));
+    assertThat("Expected the BLeScanService service to be invoked",
         BLeScanService.class.getCanonicalName(),
-        serviceIntent.getComponent().getClassName());
+        is(serviceIntent.getComponent().getClassName()));
+    assertThat((ScanParameters) serviceIntent.getParcelableExtra("OtherParam"), is(expectedScanParams));
+    assertThat(serviceIntent.getIntExtra("MYPARAM", 0), is(20));
   }
 }
