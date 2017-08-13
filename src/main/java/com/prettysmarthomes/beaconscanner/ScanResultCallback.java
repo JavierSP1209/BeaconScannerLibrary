@@ -3,8 +3,7 @@ package com.prettysmarthomes.beaconscanner;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
-
-import com.prettysmarthomes.beaconscanner.ScanParameters.ManufacturerID;
+import android.util.SparseArray;
 
 import java.util.List;
 
@@ -14,7 +13,9 @@ import no.nordicsemi.android.support.v18.scanner.ScanCallback;
 import no.nordicsemi.android.support.v18.scanner.ScanRecord;
 import no.nordicsemi.android.support.v18.scanner.ScanResult;
 
-class ScanResultCallback extends ScanCallback {
+import static com.prettysmarthomes.beaconscanner.BLeScanService.TAG;
+
+public class ScanResultCallback extends ScanCallback {
 
   private Context context;
 
@@ -26,15 +27,22 @@ class ScanResultCallback extends ScanCallback {
   @Override
   public void onBatchScanResults(List<ScanResult> results) {
     super.onBatchScanResults(results);
-    Log.d(BLeScanService.TAG, "onBatchScanResults() called");
+    Log.d(TAG, "onBatchScanResults() called");
     for (ScanResult result : results) {
-      Log.d(BLeScanService.TAG, "result = [" + result + "]");
+      Log.d(TAG, "result = [" + result + "]");
       ScanRecord scanRecord = result.getScanRecord();
       if (scanRecord != null) {
-        byte[] beaconContent = scanRecord.getManufacturerSpecificData(ManufacturerID.I_BEACON);
-        Intent beaconIntent = new Intent(BLeScanService.ACTION_BEACON_FOUNDED);
-        beaconIntent.putExtra(BLeScanService.EXTRA_BEACON_CONTENT, beaconContent);
-        context.sendBroadcast(beaconIntent);
+        SparseArray<byte[]> beaconData = scanRecord.getManufacturerSpecificData();
+        int size = beaconData.size();
+        for (int i = 0; i < size; i++) {
+          int key = beaconData.keyAt(i);
+          byte[] beaconContent = beaconData.get(key);
+          Log.d(TAG, "sending = [" + BLeScanServiceUtils.bytesToHex(beaconContent) + "]");
+          Intent beaconIntent = new Intent(BLeScanService.ACTION_BEACON_FOUNDED);
+          beaconIntent.putExtra(BLeScanService.EXTRA_BEACON_CONTENT, beaconContent);
+          Log.d(TAG, "onBatchScanResults: " + beaconIntent);
+          context.sendBroadcast(beaconIntent);
+        }
       }
     }
   }
