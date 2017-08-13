@@ -1,6 +1,6 @@
-package com.prettysmarthomes.beaconscannerlib.di;
+package com.prettysmarthomes.beaconscanner.di;
 
-import com.prettysmarthomes.beaconscannerlib.BLeScanService;
+import com.prettysmarthomes.beaconscanner.BLeScanService;
 
 import dagger.Component;
 

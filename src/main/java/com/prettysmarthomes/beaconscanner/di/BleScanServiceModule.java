@@ -1,8 +1,6 @@
-package com.prettysmarthomes.beaconscannerlib.di;
+package com.prettysmarthomes.beaconscanner.di;
 
 import android.bluetooth.BluetoothAdapter;
-
-import com.prettysmarthomes.beaconscannerlib.ScanAlarmManager;
 
 import dagger.Module;
 import dagger.Provides;
@@ -22,10 +20,5 @@ public final class BleScanServiceModule {
   @Provides
   static BluetoothLeScannerCompat providesBluetoothLeScannerCompat() {
     return BluetoothLeScannerCompat.getScanner();
-  }
-
-  @Provides
-  static ScanAlarmManager providesScanAlarmManager() {
-    return new ScanAlarmManager();
   }
 }

@@ -1,4 +1,4 @@
-package com.prettysmarthomes.beaconscannerlib.di;
+package com.prettysmarthomes.beaconscanner.di;
 
 import android.app.Service;
 import android.content.Context;

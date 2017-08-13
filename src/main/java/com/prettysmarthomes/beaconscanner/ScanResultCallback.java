@@ -1,10 +1,10 @@
-package com.prettysmarthomes.beaconscannerlib;
+package com.prettysmarthomes.beaconscanner;
 
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-import com.prettysmarthomes.beaconscannerlib.ScanParameters.ManufacturerID;
+import com.prettysmarthomes.beaconscanner.ScanParameters.ManufacturerID;
 
 import java.util.List;
 
@@ -32,7 +32,7 @@ class ScanResultCallback extends ScanCallback {
       ScanRecord scanRecord = result.getScanRecord();
       if (scanRecord != null) {
         byte[] beaconContent = scanRecord.getManufacturerSpecificData(ManufacturerID.I_BEACON);
-        Intent beaconIntent = new Intent(BLeScanService.ACTION_BEACON_FOUND);
+        Intent beaconIntent = new Intent(BLeScanService.ACTION_BEACON_FOUNDED);
         beaconIntent.putExtra(BLeScanService.EXTRA_BEACON_CONTENT, beaconContent);
         context.sendBroadcast(beaconIntent);
       }

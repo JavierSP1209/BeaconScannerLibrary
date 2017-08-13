@@ -1,4 +1,4 @@
-package com.prettysmarthomes.beaconscannerlib;
+package com.prettysmarthomes.beaconscanner;
 
 import android.app.IntentService;
 import android.bluetooth.BluetoothAdapter;
@@ -9,8 +9,8 @@ import android.support.annotation.VisibleForTesting;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
-import com.prettysmarthomes.beaconscannerlib.di.BleScanServiceBaseModule;
-import com.prettysmarthomes.beaconscannerlib.di.DaggerBLeScanServiceComponent;
+import com.prettysmarthomes.beaconscanner.di.BleScanServiceBaseModule;
+import com.prettysmarthomes.beaconscanner.di.DaggerBLeScanServiceComponent;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,12 +29,12 @@ import no.nordicsemi.android.support.v18.scanner.ScanSettings;
 public class BLeScanService extends IntentService {
 
   private static final byte[] MASK = new byte[]{0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0};
-  public static final String ACTION_BEACON_FOUND = "com.prettysmarthomes.beaconscannerlib.BEACON_FOUND";
-  public static final String ACTION_SCAN_START = "com.prettysmarthomes.beaconscannerlib.SCAN_START";
-  public static final String ACTION_SCAN_STOP = "com.prettysmarthomes.beaconscannerlib.SCAN_STOP";
+  public static final String ACTION_BEACON_FOUNDED = "com.prettysmarthomes.beaconscanner.BEACON_FOUNDED";
+  public static final String ACTION_SCAN_STARTED = "com.prettysmarthomes.beaconscanner.SCAN_STARTED";
+  public static final String ACTION_SCAN_STOPPED = "com.prettysmarthomes.beaconscanner.SCAN_STOPPED";
 
-  public static final String EXTRA_BEACON_CONTENT = "com.prettysmarthomes.beaconscannerlib.BEACON_CONTENT";
-  public static final String EXTRA_SCAN_PARAMS = "com.prettysmarthomes.beaconscannerlib.SCAN_PARAMS";
+  public static final String EXTRA_BEACON_CONTENT = "com.prettysmarthomes.beaconscanner.BEACON_CONTENT";
+  public static final String EXTRA_SCAN_PARAMS = "com.prettysmarthomes.beaconscanner.SCAN_PARAMS";
   public static final String TAG = "BleScanService";
 
   private Handler stopScanHandler;
@@ -45,13 +45,13 @@ public class BLeScanService extends IntentService {
   @Inject
   BluetoothLeScannerCompat scanner;
   @Inject
-  ScanAlarmManager scanAlarmManager;
+  BLeScanServiceManager bleScanServiceManager;
 
   private Runnable serviceStarter = new Runnable() {
     @Override
     public void run() {
       scanner.stopScan(scanCallback);
-      sendStateLocalBroadcast(ACTION_SCAN_STOP);
+      sendStateLocalBroadcast(ACTION_SCAN_STOPPED);
     }
   };
 
@@ -80,11 +80,13 @@ public class BLeScanService extends IntentService {
     if (scanParams != null) {
       if (isBLeEnabled()) {
         startScan(scanParams);
-        scanAlarmManager.startScanAlarm(getApplicationContext(), scanParams);
+        bleScanServiceManager.startScanService(getApplicationContext(), scanParams);
         stopScanHandler.postDelayed(serviceStarter, scanParams.getScanPeriod());
+      } else {
+        Log.e(TAG, "onHandleIntent: Ble disabled, service not started");
       }
     } else {
-      throw new IllegalStateException("Extra 'com.prettysmarthomes.beaconscannerlib.SCAN_PARAMS' not set");
+      throw new IllegalStateException("Extra 'com.prettysmarthomes.beaconscanner.SCAN_PARAMS' not set");
     }
   }
 
@@ -118,7 +120,7 @@ public class BLeScanService extends IntentService {
     }
     filters.add(builder.build());
     scanner.startScan(filters, settings, scanCallback);
-    sendStateLocalBroadcast(ACTION_SCAN_START);
+    sendStateLocalBroadcast(ACTION_SCAN_STARTED);
   }
 
   private boolean isBLeEnabled() {

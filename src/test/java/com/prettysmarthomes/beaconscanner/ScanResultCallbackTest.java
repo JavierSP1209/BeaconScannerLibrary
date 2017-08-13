@@ -1,4 +1,4 @@
-package com.prettysmarthomes.beaconscannerlib;
+package com.prettysmarthomes.beaconscanner;
 
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
@@ -53,7 +53,7 @@ public class ScanResultCallbackTest {
     verify(context).sendBroadcast(intentArgumentCaptor.capture());
 
     Intent actualIntent = intentArgumentCaptor.getValue();
-    assertThat(actualIntent.getAction(), is(equalTo(BLeScanService.ACTION_BEACON_FOUND)));
+    assertThat(actualIntent.getAction(), is(equalTo(BLeScanService.ACTION_BEACON_FOUNDED)));
     assertThat(actualIntent.getByteArrayExtra(BLeScanService.EXTRA_BEACON_CONTENT),
         is(beaconContent));
   }

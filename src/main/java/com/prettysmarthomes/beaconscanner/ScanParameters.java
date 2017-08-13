@@ -1,4 +1,4 @@
-package com.prettysmarthomes.beaconscannerlib;
+package com.prettysmarthomes.beaconscanner;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -7,7 +7,10 @@ import java.util.Arrays;
 
 /**
  * Class containing the scan parameters to use, this class uses the builder pattern to set only the
- * desired parameters Created by javier.silva on 5/22/16.
+ * desired parameters
+ *
+ * @author javier.silva
+ * @since 05/22/16
  */
 public class ScanParameters implements Parcelable {
   /**
