@@ -27,9 +27,7 @@ public class ScanResultCallback extends ScanCallback {
   @Override
   public void onBatchScanResults(List<ScanResult> results) {
     super.onBatchScanResults(results);
-    Log.d(TAG, "onBatchScanResults() called");
     for (ScanResult result : results) {
-      Log.d(TAG, "result = [" + result + "]");
       ScanRecord scanRecord = result.getScanRecord();
       if (scanRecord != null) {
         SparseArray<byte[]> beaconData = scanRecord.getManufacturerSpecificData();
@@ -40,7 +38,6 @@ public class ScanResultCallback extends ScanCallback {
           Log.d(TAG, "sending = [" + BLeScanServiceUtils.bytesToHex(beaconContent) + "]");
           Intent beaconIntent = new Intent(BLeScanService.ACTION_BEACON_FOUNDED);
           beaconIntent.putExtra(BLeScanService.EXTRA_BEACON_CONTENT, beaconContent);
-          Log.d(TAG, "onBatchScanResults: " + beaconIntent);
           context.sendBroadcast(beaconIntent);
         }
       }
