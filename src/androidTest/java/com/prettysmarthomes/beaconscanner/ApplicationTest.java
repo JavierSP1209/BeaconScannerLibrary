@@ -1,4 +1,4 @@
-package com.keysd.beaconscannerlib;
+package com.prettysmarthomes.beaconscanner;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;
