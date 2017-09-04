@@ -32,7 +32,7 @@ public class BLeScanServiceManager {
           PendingIntent.FLAG_UPDATE_CURRENT);
 
       // schedule the intent for future delivery
-      alarmManager.set(AlarmManager.RTC,
+      alarmManager.set(AlarmManager.RTC_WAKEUP,
           System.currentTimeMillis() + scanParameters.getScanInterval(), pendingQueryIntent);
     }
   }
