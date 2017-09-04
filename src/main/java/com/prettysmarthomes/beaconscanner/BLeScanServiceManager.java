@@ -21,25 +21,29 @@ public class BLeScanServiceManager {
 
   public void startScanService(@NonNull Context context, @NonNull ScanParameters scanParameters) {
     AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-    Intent queryIntent = new Intent(context, BLeStartScanBroadcastReceiver.class);
+    if (alarmManager != null) {
+      Intent queryIntent = new Intent(context, BLeStartScanBroadcastReceiver.class);
 
-    queryIntent.putExtra(EXTRA_SCAN_PERIOD, scanParameters.getScanPeriod());
-    queryIntent.putExtra(EXTRA_SCAN_INTERVAL, scanParameters.getScanInterval());
-    queryIntent.putExtra(EXTRA_FILTER, scanParameters.getFilterUUIDData());
-    queryIntent.putExtra(EXTRA_MANUFACTURER_ID, scanParameters.getManufacturerId());
-    PendingIntent pendingQueryIntent = PendingIntent.getBroadcast(context, 0, queryIntent,
-        PendingIntent.FLAG_UPDATE_CURRENT);
+      queryIntent.putExtra(EXTRA_SCAN_PERIOD, scanParameters.getScanPeriod());
+      queryIntent.putExtra(EXTRA_SCAN_INTERVAL, scanParameters.getScanInterval());
+      queryIntent.putExtra(EXTRA_FILTER, scanParameters.getFilterUUIDData());
+      queryIntent.putExtra(EXTRA_MANUFACTURER_ID, scanParameters.getManufacturerId());
+      PendingIntent pendingQueryIntent = PendingIntent.getBroadcast(context, 0, queryIntent,
+          PendingIntent.FLAG_UPDATE_CURRENT);
 
-    // schedule the intent for future delivery
-    alarmManager.set(AlarmManager.RTC,
-        System.currentTimeMillis() + scanParameters.getScanInterval(), pendingQueryIntent);
+      // schedule the intent for future delivery
+      alarmManager.set(AlarmManager.RTC,
+          System.currentTimeMillis() + scanParameters.getScanInterval(), pendingQueryIntent);
+    }
   }
 
   public void cancelScanService(@NonNull Context context) {
     AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-    Intent queryIntent = new Intent(context, BLeStartScanBroadcastReceiver.class);
-    PendingIntent pendingQueryIntent = PendingIntent.getBroadcast(context, 0, queryIntent,
-        PendingIntent.FLAG_UPDATE_CURRENT);
-    alarmManager.cancel(pendingQueryIntent);
+    if (alarmManager != null) {
+      Intent queryIntent = new Intent(context, BLeStartScanBroadcastReceiver.class);
+      PendingIntent pendingQueryIntent = PendingIntent.getBroadcast(context, 0, queryIntent,
+          PendingIntent.FLAG_UPDATE_CURRENT);
+      alarmManager.cancel(pendingQueryIntent);
+    }
   }
 }
