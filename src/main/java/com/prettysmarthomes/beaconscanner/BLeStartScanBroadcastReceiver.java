@@ -16,13 +16,15 @@ public class BLeStartScanBroadcastReceiver extends BroadcastReceiver {
   public void onReceive(Context context, Intent intent) {
     Intent queryIntent = new Intent(context, BLeScanService.class);
     Bundle extras = intent.getExtras();
-    ScanParameters scanParameters = new ScanParameters.Builder()
-        .setFilterUUIDData(extras.getByteArray(EXTRA_FILTER))
-        .setScanInterval(extras.getLong(EXTRA_SCAN_INTERVAL))
-        .setScanPeriod(extras.getLong(EXTRA_SCAN_PERIOD))
-        .setManufacturerId(extras.getInt(EXTRA_MANUFACTURER_ID))
-        .build();
-    queryIntent.putExtra(BLeScanService.EXTRA_SCAN_PARAMS, scanParameters);
-    context.startService(queryIntent);
+    if (extras != null) {
+      ScanParameters scanParameters = new ScanParameters.Builder()
+          .setFilterUUIDData(extras.getByteArray(EXTRA_FILTER))
+          .setScanInterval(extras.getLong(EXTRA_SCAN_INTERVAL))
+          .setScanPeriod(extras.getLong(EXTRA_SCAN_PERIOD))
+          .setManufacturerId(extras.getInt(EXTRA_MANUFACTURER_ID))
+          .build();
+      queryIntent.putExtra(BLeScanService.EXTRA_SCAN_PARAMS, scanParameters);
+      context.startService(queryIntent);
+    }
   }
 }
